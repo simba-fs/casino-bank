@@ -1,0 +1,25 @@
+{
+	"name": "casino-bank",
+	"version": "1.0.0",
+	"description": " bank software for 2019summer ",
+	"main": "app.js",
+	"scripts": {
+		"start": "nodemon app.js",
+		"test": "nodemon app.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://simba-fs@github.com/simba-fs/casino-bank.git"
+	},
+	"keywords": [
+		"node",
+		"bank"
+	],
+	"author": "simba.fs@gmail.com",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/simba-fs/casino-bank/issues"
+	},
+	"homepage": "https://github.com/simba-fs/casino-bank#readme",
+	"dependencies": {}
+}
