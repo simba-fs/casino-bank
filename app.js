@@ -1,30 +1,39 @@
 var fs = require('fs');
 var repl = require('repl');
-var bank = {
-	10990: {
-		name: 'simba',
-		id: 10990,
-		money: 10000
-	}
-};
+var bank = {};
 var IDs = [];
+var rate = 0.01;
+var mode = 'release';
 
 class Person {
 	constructor(name){
-		this.name = name;
-		this.id = genID(IDs, 5);
-		this.money = 0;
+		if(!name) return console.error('name missed');
+		let flag = true;
+		for(let i in bank){
+			if(name === bank[i].name) flag = false;
+		}
+		if(flag){
+			this.name = name;
+			this.id = genID(IDs, 5);
+			this.money = 0;
+			bank[this.id] = this;
+			if(mode === 'release') show();
+		}else{
+			console.error('User already exist !!');
+		}
 	}
 }
 
 function save(){
 	let data = JSON.stringify(bank);
 	fs.writeFileSync('./bank.json', data);
+	if(mode === 'release') show();
 }
 
 function load(){
 	let newData = require('./bank.json');
-	data = newData;
+	Object.assign(bank, newData);
+	if(mode === 'release') show();
 }
 
 function withdrawal(name, amount){
@@ -34,19 +43,67 @@ function withdrawal(name, amount){
 			user = bank[i];
 		}
 	}
-	console.log(user);
+	if(user){
+		if(amount > user.money){
+			return console.error('you don\'t have so much money');
+		}
+		console.table([{
+			name: user.name,
+			id: user.id,
+			money: user.money,
+			withdrawal: amount,
+			left: user.money - amount
+		}]);
+	
+		user.money -= amount;
+		if(mode === 'release') show();
+	}else{
+		return console.error('You don\'t have account new');
+	}
 }
 
 function deposit(name, amount){
+	let user;
+	for(let i in bank){
+		if(bank[i].name === name){
+			user = bank[i];
+		}
+	}
+	if(user){
+		console.table([{
+			name: user.name,
+			id: user.id,
+			money: user.money,
+			deposit: amount,
+			left: user.money + amount
+		}]);
+		user.money += amount;
+	}else{
+		let user = new Person(name);
+		if(user){
+			console.table([{
+				name: user.name,
+				id: user.id,
+				money: user.money,
+				deposit: amount,
+				left: user.money + amount
+			}]);
+			user.money = amount;	
+		}
+	}
+	if(mode === 'release') show();
 	
 }
 
 function show(){
-	console.log(bank);
+	console.table(bank);
 }
 
-function cycle(n){
-
+function cycle(n = 1){
+	for(let i in bank){
+		bank[i].money = bank[i].money * (1 + Math.pow(rate, n));
+	}
+	if(mode === 'release') show();
 }
 
 function genID(from, n){
@@ -54,7 +111,6 @@ function genID(from, n){
 	let t;
 	do{
 		t = Math.floor(Math.random() * Math.pow(10,n));
-		console.log(t);
 	}while(from.includes(t));
 	from.push(t);
 	return t;
@@ -62,11 +118,15 @@ function genID(from, n){
 
 var context = repl.start().context;
 
-context.save = save;
-context.load = load;
-context.withdrawal = withdrawal;
-context.deposit = deposit;
-context.show = show;
-context.cycle = cycle;
-context.genID = genID;
-context.bank = bank;
+Object.assign(context, {
+	save: save,
+	load: load,
+	withdrawal: withdrawal,
+	deposit: deposit,
+	show: show,
+	cycle: cycle,
+	genID: genID,
+	bank: bank,
+	Person: Person,
+	mode: mode
+});
