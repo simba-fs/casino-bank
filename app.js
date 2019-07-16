@@ -1,9 +1,12 @@
+#! /usr/bin/env node
 var fs = require('fs');
 var repl = require('repl');
 var bank = {};
 var IDs = [];
 var rate = 0.01;
 var mode = 'release';
+var doRenewInfo = false;
+var renew;
 
 class Person {
 	constructor(name){
@@ -17,21 +20,20 @@ class Person {
 			this.id = genID(IDs, 5);
 			this.money = 0;
 			bank[this.id] = this;
-			if(mode === 'release') show();
 		}else{
 			console.error('User already exist !!');
 		}
 	}
 }
 
-function save(){
+function save(file = './bank.json'){
 	let data = JSON.stringify(bank);
-	fs.writeFileSync('./bank.json', data);
+	fs.writeFileSync(file, data);
 	if(mode === 'release') show();
 }
 
-function load(){
-	let newData = require('./bank.json');
+function load(file = './bank.json'){
+	let newData = require('./' + file);
 	Object.assign(bank, newData);
 	if(mode === 'release') show();
 }
@@ -92,10 +94,10 @@ function deposit(name, amount){
 		}
 	}
 	if(mode === 'release') show();
-	
 }
 
 function show(){
+	console.log()
 	console.table(bank);
 }
 
@@ -103,7 +105,35 @@ function cycle(n = 1){
 	for(let i in bank){
 		bank[i].money = bank[i].money * (1 + Math.pow(rate, n));
 	}
-	if(mode === 'release') show();
+	if(doRenewInfo) show();
+}
+
+function cycleStart(n){
+	if(!n) return console.error('n missed');
+	renew = setTimeout(() => {
+		cycle();
+		cycleStart(n);
+	}, n)
+}
+
+function cycleStop(){
+	clearTimeout(renew);
+}
+
+function clear(name){
+	if(!name) return console.error('name missed');
+	let user;
+	for(let i in bank){
+		if(bank[i].name === name){
+			user = bank[i];
+		}
+	}
+	if(user){
+		user.money = 0;
+		if(mode === 'release') show();
+	}else{
+		return console.error('user not found');
+	}
 }
 
 function genID(from, n){
@@ -116,9 +146,11 @@ function genID(from, n){
 	return t;
 }
 
-var context = repl.start().context;
+function setDRI(n){
+	doRenewInfo = n;
+}
 
-Object.assign(context, {
+Object.assign(repl.start().context, {
 	save: save,
 	load: load,
 	withdrawal: withdrawal,
@@ -128,5 +160,14 @@ Object.assign(context, {
 	genID: genID,
 	bank: bank,
 	Person: Person,
-	mode: mode
+	mode: mode,
+	cycleStop: cycleStop,
+	cycleStart: cycleStart,
+	setDRI: setDRI,
+	clear: clear,
+	//alias
+	start: cycleStart,
+	stop: cycleStop,
+	s: cycleStop
 });
+
