@@ -97,7 +97,7 @@ function deposit(name, amount){
 }
 
 function show(){
-	console.log()
+	console.clear();
 	console.table(bank);
 }
 
