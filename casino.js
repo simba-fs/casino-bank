@@ -68,6 +68,7 @@
 
 	handlers.update = function(data){
 		console.log('update');
+		console.log(data);
 	}
 
 	var req = {
@@ -78,14 +79,12 @@
 
 	function sendRequest(type){
 		var data = {};
-		var userName = '';
+		var userName = $('#username').val();
 		var amount = '';
 		if(type === 'deposition'){
-			userName = $('#deposition-username').val();
 			amount = $('#deposition-input').val();
 			data = new Deposition(userName, amount);
 		}else if(type === 'withdrawal'){
-			userName = $('#withdrawal-username').val();
 			amount = $('#withdrawal-input').val();
 			data = new Deposition(userName, amount);
 		}else{
