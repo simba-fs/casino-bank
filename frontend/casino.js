@@ -1,100 +1,48 @@
-(function($){
+var ws;
+
+if(!('WebSocket' in window)){
+	alert('your blowser doesn\'t support webSocket, please switch to chrome or firefox');
+	$('input, button').attr('disabled', true);
+}
+
+$('#deposition-input, #withdrawal-input').val(1000).attr('step', 1000);
+$('#deposition-button').click('deposition', sendData);
+$('#withdrawal-button').click('withdrawal', sendData);
+$('.disable').attr('disabled', true);
+
+$('#connect').click(() => {
+	var url = $('#url').val() || 'ws://localhost:1234';
+	ws = new WebSocket(url);
 	
-	///// define class ///// 
-	class Deposition{
-		constructor(userName, amount){
-			this.type = 'deposition';
-			this.userName = userName;
-			this.amount = amount;
-			this.timestamp = (new Date()).getTime();
-		}
-		
-		toString(){
-			return JSON.stringify(this);
-		}
-	}
-	class Withdrawal{
-		constructor(userName, withdrawal){
-			this.type = 'withdrawal';
-			this.userName = userName;
-			this.amount = amount;
-			this.timestamp = (new Date()).getTime();
-		}
-		
-		toString(){
-			return JSON.stringify(this);
-		}
-	}
-	
-	///// open ws connection /////
-	var wsServer = 'ws://localhost:3000';
-	var ws = new WebSocket(wsServer);
-
-	ws.onopen = function(e){
-		console.log('Connection to server ' + wsServer);
-	}
-
-	ws.onmessage = function(event){
-		///// output to console ///// 
-		console.log('Received a message');
-		console.log(event);
-
-		//// handler /////
-		var data = JSON.parse(event.data);
-		if(event.data.type in req){
-			req[event.data.type](data);
-		}
-	}
-		
-	///// handle data from server /////
-	
-	var handlers = {};
-
-	handlers.deposition = function(data){
-		if(data.type === 'error'){
-			alert('ERROR: ' + data.error);
-		}else{
-			alert('Successed');
-		}
-	}
-
-	handlers.withdrawal = function(data){
-		if(data.type === 'error'){
-			alert('ERROR: ' + data.error);
-		}else{
-			alert('Successed');
-		}
-	}
-
-	handlers.update = function(data){
-		console.log('update');
-		console.log(data);
-	}
-
-	var req = {
-		'deposition': handlers.deposition,
-		'withdrawal': handlers.withdrawal,
-		'update': handlers.update
+	ws.onopen = function(){
+		console.log('connected to ' + url);
+		$('.enable').attr('disabled', true);
+		$('.disable').attr('disabled', false);
 	};
 
-	function sendRequest(type){
-		var data = {};
-		var userName = $('#username').val();
-		var amount = '';
-		if(type === 'deposition'){
-			amount = $('#deposition-input').val();
-			data = new Deposition(userName, amount);
-		}else if(type === 'withdrawal'){
-			amount = $('#withdrawal-input').val();
-			data = new Deposition(userName, amount);
-		}else{
-			return;
-		}
+	ws.onclose = function(){
+		console.log('connection closed');
+		$('.enable').attr('disabled', false);
+		$('.disable').attr('disabled', true);
+	};
+});
 
-		var json = data.toString();
-		ws.send(json);
+function sendData(mode){
+	var username = $('#username').val();
+	if(!username){
+		alert('ERROR!! userName missed !!');
+		return console.error('ERROR!! userName missed !!');
 	}
+	if(mode === 'deposition' || mode === 'withdrawal'){
+		var data = {
+			type: mode,
+			userName: username,
+			amount: $(`#${mode}-input`)
+		};
+		var json = JSON.stringify(data);
+		ws.send(json);
+	}else{
+		return console.error(`in xfunction sendData, unknown mode: ${mode}`);
+	}
+}
 
-	$('#deposition-button').click('deposition', sendRequest);
-	$('#withdrawal-button').click('withdrawal', sendRequest);
-})($);

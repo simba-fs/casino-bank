@@ -7,18 +7,22 @@
 </head>
 <body>
 	<h1>賭場銀行</h1>
+	<label for="url">host url:</label>
+		<input class="enable" id="url" type="url">
+		<button class="enable" id="connect">connect</button>
 	<hr>
 	<label for="username">名字：</label>
 		<input id="username" type="text">
 		<br>
+		<br>
 	<label for="deposition-input">存款：</label>
-		<input id="deposition-input" type="number">
-		<button id="deposition-button">確認</button>
+		<input class="disable" id="deposition-input" type="number">
+		<button class="disable" id="deposition-button">確認</button>
+		<br>
 		<br>
 	<label for="withdrawal-input">提款：</label>
-		<input id="withdrawal-input" type="number">
-		<button id="withdrawal">確認</button>
-		<br>
+		<input class="disable" id="withdrawal-input" type="number">
+		<button class="disable" id="withdrawal">確認</button>
 	<script src="./casino.js"></script>
 </body>
 </html>
