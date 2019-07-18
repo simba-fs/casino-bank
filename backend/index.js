@@ -1,19 +1,25 @@
+///// setup port number /////
+var port = 8080;
+
+///// create ws server /////
 var webSocketServer = require('ws').Server;
-var wsServer = new webSocketServer({port: 3000});
+var wsServer = new webSocketServer({port: port});
+
+///// import router /////
 var routers = require('./routers.js');
 
+///// storage all commection /////
 var clients = [];
 
 wsServer.on('connection', ws => {
+	///// add one connection /////
 	clients.push(ws);
-	console.log('A connection');
-	console.log(clients);
-
+	
+	console.log('a new connection');
+	
 	ws.on('message', msg => {
 		var data = JSON.parse(msg);
-		console.table(data);
-		
-		routers(data, ws);
+		routers(data, ws, clients);
 	});
 
 	ws.on('close', () => {

@@ -5,8 +5,9 @@ var bank = {};
 var IDs = [];
 var rate = 0.01;
 var mode = 'release';
-var doRenewInfo = false;
+var doRenewInfo = true;
 var renew;
+var file = './test-bank.json';
 
 class Person {
 	constructor(name){
@@ -47,7 +48,12 @@ function withdrawal(name, amount){
 	}
 	if(user){
 		if(amount > user.money){
-			return console.error('you don\'t have so much money');
+			console.error('you don\'t have so much money');
+			return {
+				type: 'error',
+				errorCode: 100,
+				user: user
+			};
 		}
 		console.table([{
 			name: user.name,
@@ -58,9 +64,14 @@ function withdrawal(name, amount){
 		}]);
 	
 		user.money -= amount;
+		save(file);
 		if(mode === 'release') show();
 	}else{
-		return console.error('You don\'t have account new');
+		console.error('You don\'t have account new');
+		return {
+			type: 'error',
+			errorCode: 101,
+		};
 	}
 }
 
@@ -80,6 +91,7 @@ function deposit(name, amount){
 			left: user.money + amount
 		}]);
 		user.money += amount;
+		save(file);
 	}else{
 		let user = new Person(name);
 		if(user){
@@ -105,6 +117,7 @@ function cycle(n = 1){
 	for(let i in bank){
 		bank[i].money = bank[i].money * (1 + Math.pow(rate, n));
 	}
+	save(file);
 	if(doRenewInfo) show();
 }
 
@@ -130,6 +143,7 @@ function clear(name){
 	}
 	if(user){
 		user.money = 0;
+		save(file);
 		if(mode === 'release') show();
 	}else{
 		return console.error('user not found');
@@ -150,7 +164,7 @@ function setDRI(n){
 	doRenewInfo = n;
 }
 
-Object.assign(repl.start().context, {
+var output = {
 	save: save,
 	load: load,
 	withdrawal: withdrawal,
@@ -169,5 +183,7 @@ Object.assign(repl.start().context, {
 	start: cycleStart,
 	stop: cycleStop,
 	s: cycleStop
-});
+};
 
+Object.assign(repl.start().context,output);
+module.exports = output;
