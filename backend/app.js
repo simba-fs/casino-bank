@@ -109,6 +109,7 @@ function deposit(name, amount){
 }
 
 function show(){
+	require('./handlers.js').update(require('./index.js').clients);
 	console.clear();
 	console.table(bank);
 }

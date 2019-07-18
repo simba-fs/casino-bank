@@ -26,3 +26,5 @@ wsServer.on('connection', ws => {
 		clients = clients.filter(item => item !== ws);
 	});
 });
+
+module.exports.clients = clients;

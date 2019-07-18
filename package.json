@@ -4,7 +4,7 @@
   "description": " bank software for 2019summer ",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js",
+    "start": "node app.js",
     "test": "nodemon app.js"
   },
   "repository": {

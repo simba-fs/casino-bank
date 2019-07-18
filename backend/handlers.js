@@ -20,7 +20,7 @@ function errorType(data, ws, clients){
 		errorCode: 102
 	};
 	var json = JSON.stringify(data);
-	ws,send(json);
+	ws.send(json);
 }
 
 ///// update all client /////
@@ -30,6 +30,7 @@ function update(clients){
 		type: 'update',
 		data: casino.bank
 	});
+	console.log(clients.length);
 	clients.forEach(item => {
 		item.send(json);
 	});
@@ -39,3 +40,4 @@ function update(clients){
 module.exports.deposition = deposition;
 module.exports.withdrawal = withdrawal;
 module.exports.errorType = errorType;
+module.exports.update = update;
